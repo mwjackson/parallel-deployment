@@ -14,7 +14,7 @@ namespace Parallel.Deployment
 		}
 
 		public ProcessResult Do(ServerCredentials server) {
-			return _sshCommand.Do(server, string.Format(@"C:\7-Zip\7z.exe -y x -o{0} ""{1}{2}""",
+			return _sshCommand.Do(server, string.Format(@"7z.exe -y x -o{0} ""{1}{2}""",
 			                                            _buildToolsDirectory,
 			                                            server.HomeDirectory,
 			                                            _buildToolsZip));

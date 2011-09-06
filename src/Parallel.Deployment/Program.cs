@@ -14,6 +14,12 @@ namespace Parallel.Deployment {
 		{
 			try
 			{
+				if (!File.Exists(CONFIG_FILE)) {
+					Console.WriteLine("No deploymentConfig.xml found. Creating empty one!");
+					CreateConfigFile();
+					return 0;
+				}				
+				
 				var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
 				_deploymentConfiguration = (DeploymentConfiguration) xmlSerializer.Deserialize(new StreamReader(CONFIG_FILE, false));
 
@@ -39,10 +45,16 @@ namespace Parallel.Deployment {
 				return 1;
 			}
 		}
+		
+		private static void CreateConfigFile() {
+			var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
+			var emptyConfig = new DeploymentConfiguration();
+			xmlSerializer.Serialize(new StreamWriter(CONFIG_FILE, false), emptyConfig);
+		}
 
 		private static void Deploy(ServerCredentials server)
 		{
-			HandleResult(new SftpBuildToolsZip(_deploymentConfiguration.BuildToolsZipName).Do(server));
+			HandleResult(new SftpBuildToolsZip(_deploymentConfiguration.BuildToolsPath, _deploymentConfiguration.BuildToolsZipName).Do(server));
 			HandleResult(new SshUnzip(_deploymentConfiguration.BuildToolsPath, _deploymentConfiguration.BuildToolsZipName).Do(server));
 		}
 
