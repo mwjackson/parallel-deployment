@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace Parallel.Deployment {
@@ -18,25 +16,14 @@ namespace Parallel.Deployment {
 					Console.WriteLine("No deploymentConfig.xml found. Creating empty one!");
 					CreateConfigFile();
 					return 0;
-				}				
-				
-				var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
-				_deploymentConfiguration = (DeploymentConfiguration) xmlSerializer.Deserialize(new StreamReader(CONFIG_FILE, false));
+				}
 
-				HandleResult(new ImportRegistryKeys(_deploymentConfiguration.BuildToolsPath).Do());
+                var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
+                _deploymentConfiguration = (DeploymentConfiguration)xmlSerializer.Deserialize(new StreamReader(CONFIG_FILE, false));
 
-				var tasks = new List<Task>();
-				_deploymentConfiguration.Servers.ForEach(server =>
-					{
-						var task = Task.Factory.StartNew(() => Deploy(server));
-						tasks.Add(task);
-					}
-				);
+                new ParallelDeployment(_deploymentConfiguration).Do();
 
-				Task.WaitAll(tasks.ToArray());
-				Console.WriteLine("Finished!");
-				Console.ReadKey();
-				return 0;
+			    return 0;
 			} 
 			catch(Exception e)
 			{
@@ -45,26 +32,11 @@ namespace Parallel.Deployment {
 				return 1;
 			}
 		}
-		
-		private static void CreateConfigFile() {
+
+	    private static void CreateConfigFile() {
 			var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
 			var emptyConfig = new DeploymentConfiguration();
 			xmlSerializer.Serialize(new StreamWriter(CONFIG_FILE, false), emptyConfig);
-		}
-
-		private static void Deploy(ServerCredentials server)
-		{
-			HandleResult(new SftpBuildToolsZip(_deploymentConfiguration.BuildToolsPath, _deploymentConfiguration.BuildToolsZipName).Do(server));
-			HandleResult(new SshUnzip(_deploymentConfiguration.BuildToolsPath, _deploymentConfiguration.BuildToolsZipName).Do(server));
-		}
-
-		private static readonly object _lockObj = new object();
-		private static void HandleResult(ProcessResult result) {
-			lock(_lockObj)
-			{
-				Console.WriteLine(result);
-			}
-			if (result.ExitCode != 0) throw new InvalidOperationException(string.Format("Non-zero exit code from task: {0}", result.ExitCode));
 		}
 	}
 }

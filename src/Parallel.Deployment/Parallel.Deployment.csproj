@@ -46,7 +46,9 @@
     <Compile Include="Command.cs" />
     <Compile Include="DeploymentConfiguration.cs" />
     <Compile Include="ImportRegistryKeys.cs" />
+    <Compile Include="ParallelDeployment.cs" />
     <Compile Include="ProcessResult.cs" />
+    <Compile Include="ProcessResultExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerCredentials.cs" />
