@@ -18,10 +18,9 @@ namespace Parallel.Deployment {
 					return 0;
 				}
 
-                var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
-                _deploymentConfiguration = (DeploymentConfiguration)xmlSerializer.Deserialize(new StreamReader(CONFIG_FILE, false));
+                ReadConfigFile();
 
-                new ParallelDeployment(_deploymentConfiguration).Do();
+			    new ParallelDeployment(_deploymentConfiguration).Do();
 
 			    return 0;
 			} 
@@ -32,6 +31,12 @@ namespace Parallel.Deployment {
 				return 1;
 			}
 		}
+
+	    private static void ReadConfigFile()
+	    {
+	        var xmlSerializer = new XmlSerializer(typeof (DeploymentConfiguration));
+	        _deploymentConfiguration = (DeploymentConfiguration) xmlSerializer.Deserialize(new StreamReader(CONFIG_FILE, false));
+	    }
 
 	    private static void CreateConfigFile() {
 			var xmlSerializer = new XmlSerializer(typeof(DeploymentConfiguration));
